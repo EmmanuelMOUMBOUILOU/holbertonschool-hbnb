@@ -1,7 +1,8 @@
 from app.models.base_model import BaseModel
 from app.models.user import User
 from app.models.place import Place
-from app.extensions.db import db
+from app import db
+from .base_model import BaseModel
 
 
 class Review(BaseModel):

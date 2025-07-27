@@ -1,5 +1,5 @@
-from app.models.base_model import BaseModel
-from app.extensions.db import db
+from app import db
+from .base_model import BaseModel
 
 class Amenity(BaseModel):
     def __init__(self, name):

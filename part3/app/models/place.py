@@ -1,7 +1,11 @@
-from app.models.base_model import BaseModel
 from app.models.user import User
 from app.models.amenity import Amenity
-from app.extensions.db import db
+from app import db
+from .base_model import BaseModel
+from .user import User
+from .review import Review
+from .amenity import Amenity
+from .place import place_amenity
 
 place_amenity = db.Table(
     'place_amenity',

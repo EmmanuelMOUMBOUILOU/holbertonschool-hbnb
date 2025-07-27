@@ -3,6 +3,7 @@ from app import db, bcrypt
 import uuid
 from datetime import datetime
 from app.models.base_model import BaseModel
+from .base_model import BaseModel
 
 
 class User(BaseModel):
