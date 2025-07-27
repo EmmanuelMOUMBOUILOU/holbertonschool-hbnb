@@ -6,6 +6,7 @@ from .user import User
 from .review import Review
 from .amenity import Amenity
 from .place import place_amenity
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
 
 place_amenity = db.Table(
     'place_amenity',
@@ -61,6 +62,7 @@ class Place(db.Model):
     price = db.Column(db.Float, nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
+    name = db.Column(db.String(128), nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     reviews = db.relationship('Review', backref='place', lazy=True)

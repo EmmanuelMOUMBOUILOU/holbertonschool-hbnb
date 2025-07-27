@@ -4,9 +4,10 @@ import uuid
 from datetime import datetime
 from app.models.base_model import BaseModel
 from .base_model import BaseModel
+from sqlalchemy.orm import relationship
 
 
-class User(BaseModel):
+class User(BaseModel, db.Model):
     __tablename__ = 'users'
 
     first_name = db.Column(db.String(50), nullable=False)
