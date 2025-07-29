@@ -33,13 +33,47 @@ main {
 
 
 
-.place-card, .review-card {
+.place-card {
   margin: 20px;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 10px;
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  background-color: #fff;
+  text-align: center;
+  width: 250px;
+}
+
+
+
+.details-button {
+  margin-top: 10px;
+  background-color: orange;
+  border: none;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+
+
+.review-card {
+  margin: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #fff;
+}
+.place-details {
+  margin: 20px;
+}
+.place-info {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
 }
 
 
@@ -59,8 +93,9 @@ main {
 }
 
 footer {
+  background-color: orange;
+  color: white;
   text-align: center;
   padding: 1rem;
-  background-color: #eee;
   margin-top: 2rem;
 }
