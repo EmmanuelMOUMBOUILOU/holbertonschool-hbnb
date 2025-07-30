@@ -99,3 +99,17 @@ footer {
   padding: 1rem;
   margin-top: 2rem;
 }
+
+
+
+.details-button:hover {
+    background-color: #45a049;
+}
+
+.add-review textarea,
+.add-review select {
+    display: block;
+    margin-top: 10px;
+    width: 100%;
+    padding: 8px;
+}
