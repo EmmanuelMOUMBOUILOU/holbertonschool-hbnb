@@ -3,6 +3,8 @@
   Please, follow the project instructions to complete the tasks.
 */
 
+// Script pour la page de connexion (login.html)
+
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
 
@@ -42,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-
+// Script pour la page d'accueil (index.html)
 
 document.addEventListener('DOMContentLoaded', () => {
     checkAuthentication();
@@ -129,3 +131,88 @@ document.getElementById('price-filter').addEventListener('change', (event) => {
     });
 });
 
+// Script pour la page de détails d'un lieu (place.html)
+
+function getPlaceIdFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('id');
+}
+
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
+
+function checkAuthentication(placeId) {
+  const token = getCookie('token');
+  const addReviewSection = document.getElementById('add-review');
+
+  if (!token) {
+    addReviewSection.style.display = 'none';
+  } else {
+    addReviewSection.style.display = 'block';
+  }
+
+  // Même sans token, on affiche les détails publics du lieu
+  fetchPlaceDetails(token, placeId);
+}
+
+async function fetchPlaceDetails(token, placeId) {
+  try {
+    const response = await fetch(`http://localhost:5001/api/v1/places/${placeId}`, {
+      method: 'GET',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erreur: ${response.status}`);
+    }
+
+    const place = await response.json();
+    displayPlaceDetails(place);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des détails du lieu :', error);
+  }
+}
+
+function displayPlaceDetails(place) {
+  const detailsSection = document.getElementById('place-details');
+  detailsSection.innerHTML = '';  // Nettoyage
+
+  const name = document.createElement('h2');
+  name.textContent = place.name;
+
+  const description = document.createElement('p');
+  description.textContent = place.description;
+
+  const price = document.createElement('p');
+  price.textContent = `Prix: ${place.price} €`;
+
+  const amenities = document.createElement("ul");
+  place.amenities.forEach(amenity => {
+      const li = document.createElement("li");
+      li.textContent = amenity.name;
+      amenities.appendChild(li);
+  });
+
+  const reviews = document.createElement("ul");
+  place.reviews.forEach(review => {
+      const li = document.createElement("li");
+      li.textContent = `${review.user_name}: ${review.text}`;
+      reviews.appendChild(li);
+  });
+
+  detailsSection.append(name, description, price, document.createElement("hr"), amenities, document.createElement("hr"), reviews);
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const placeId = getPlaceIdFromURL();
+  if (placeId) {
+    checkAuthentication(placeId);
+  } else {
+    alert("Aucun identifiant de lieu trouvé dans l'URL.");
+  }
+});
