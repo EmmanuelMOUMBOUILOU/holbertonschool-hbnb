@@ -216,3 +216,71 @@ document.addEventListener('DOMContentLoaded', () => {
     alert("Aucun identifiant de lieu trouvé dans l'URL.");
   }
 });
+
+// Script pour la page d'ajout de lieu (add_review.html)
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+function checkAuthentication() {
+    const token = getCookie('token');
+    if (!token) {
+        // Redirige vers la page d'accueil si non connecté
+        window.location.href = 'index.html';
+    }
+    return token;  // retourne le token pour l'utiliser plus tard
+}
+
+function getPlaceIdFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('place_id'); // Exemple : ?id=42
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const token = checkAuthentication();
+    const placeId = getPlaceIdFromURL();
+    const reviewForm = document.getElementById('review-form');
+
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const reviewText = document.getElementById('review-text').value;
+            await submitReview(token, placeId, reviewText);
+        });
+    }
+});
+
+async function submitReview(token, placeId, reviewText) {
+    try {
+        const response = await fetch('http://localhost:5000/api/v1/reviews', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                place_id: placeId,
+                text: reviewText
+            })
+        });
+
+        handleResponse(response);
+    } catch (error) {
+        alert('Erreur lors de la soumission : ' + error.message);
+    }
+}
+
+async function handleResponse(response) {
+    if (response.ok) {
+        alert('Avis envoyé avec succès !');
+        document.getElementById('review-text').value = '';
+    } else {
+        const data = await response.json();
+        alert(`Erreur : ${data.message || 'Échec de l’envoi'}`);
+    }
+}
+
