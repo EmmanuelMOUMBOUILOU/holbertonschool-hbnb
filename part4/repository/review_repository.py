@@ -1,9 +1,9 @@
-from models.review import Review
-from models import db
+from app.models.review import Review
+from app import db
 
 class ReviewRepository:
-    def __init__(self, session=db.session):
-        self.session = session
+    def __init__(self, session=None):
+        self.session = session or db.session
 
     def add(self, review):
         self.session.add(review)
