@@ -1,9 +1,10 @@
-from models.place import Place
-from models import db
+from app.models.place import Place
+from app import db
 
 class PlaceRepository:
-    def __init__(self, session=db.session):
-        self.session = session
+    def __init__(self, session=None):
+        # Utilise la session passée ou la session globale par défaut
+        self.session = session or db.session
 
     def add(self, place):
         self.session.add(place)
