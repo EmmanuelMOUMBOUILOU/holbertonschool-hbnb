@@ -32,8 +32,24 @@ class HBnBFacade:
     def get_all_users(self):
         return self.user_repo.get_all()
 
-    def put_update_users(self, user_id):
-        return self.user_repo.put(user_id)
+    def update_user(self, user_id, user_data):
+        user = self.user_repo.get(user_id)
+        if not user:
+            return None
+        for key, value in user_data.items():
+            if key == "password":
+                user.hash_password(value)
+            else:
+                setattr(user, key, value)
+        self.user_repo.update(user)
+        return user
+
+    def delete_user(self, user_id):
+        user = self.user_repo.get(user_id)
+        if not user:
+            return None
+        self.user_repo.delete(user)
+        return True
 
     # ---------- Amenities ----------
     def create_amenity(self, amenity_data):
@@ -53,7 +69,7 @@ class HBnBFacade:
             return None
         for key, value in amenity_data.items():
             setattr(amenity, key, value)
-        self.amenity_repo.update()
+        self.amenity_repo.update(amenity)
         return amenity
 
     # ---------- Places ----------
@@ -112,7 +128,7 @@ class HBnBFacade:
         ]:
             if key in data:
                 setattr(place, key, data[key])
-        self.place_repo.update()
+        self.place_repo.update(place)
         return place
 
     # ---------- Reviews ----------
@@ -148,7 +164,7 @@ class HBnBFacade:
             return None
         for key, value in review_data.items():
             setattr(review, key, value)
-        self.review_repo.update()
+        self.review_repo.update(review)
         return review
 
     def delete_review(self, review_id):
@@ -157,3 +173,20 @@ class HBnBFacade:
             return None
         self.review_repo.delete(review)
         return True
+
+
+# --- Fonctions exposées globalement ---
+
+_facade = HBnBFacade()
+
+def get_user_by_email(email):
+    return _facade.get_user_by_email(email)
+
+def create_user(user_data):
+    return _facade.create_user(user_data)
+
+def update_user(user_id, user_data):
+    return _facade.update_user(user_id, user_data)
+
+def delete_user(user_id):
+    return _facade.delete_user(user_id)
