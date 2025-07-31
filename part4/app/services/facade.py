@@ -131,6 +131,13 @@ class HBnBFacade:
         self.place_repo.update(place)
         return place
 
+    def delete_place(self, place_id):
+        place = self.place_repo.get(place_id)
+        if not place:
+            return None
+        self.place_repo.delete(place)
+        return True
+
     # ---------- Reviews ----------
     def create_review(self, review_data):
         user = self.user_repo.get(review_data["user_id"])
@@ -223,6 +230,9 @@ def list_places():
 
 def update_place(place_id, data):
     return _facade.update_place(place_id, data)
+
+def delete_place(place_id):
+    return _facade.delete_place(place_id)
 
 # Reviews
 def create_review(review_data):
