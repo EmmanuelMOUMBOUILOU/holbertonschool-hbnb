@@ -10,33 +10,41 @@ class AdminAmenityCreate(Resource):
     @jwt_required()
     def post(self):
         current_user = get_jwt_identity()
-        if not current_user.get('is_admin'):
+        if not current_user or not current_user.get('is_admin'):
             return {'error': 'Admin privileges required'}, 403
 
-        data = request.json
+        data = request.get_json()
         if not data or not data.get('name'):
             return {'error': 'Amenity name required'}, 400
 
-        new_amenity = create_amenity(data)
+        try:
+            new_amenity = create_amenity(data)
+        except Exception as e:
+            return {'error': str(e)}, 400
+
         return {
             'message': 'Amenity created',
             'amenity': new_amenity.to_dict()
         }, 201
 
-@api.route('/<amenity_id>')
+@api.route('/<string:amenity_id>')
 class AdminAmenityModify(Resource):
     @jwt_required()
     def put(self, amenity_id):
         current_user = get_jwt_identity()
-        if not current_user.get('is_admin'):
+        if not current_user or not current_user.get('is_admin'):
             return {'error': 'Admin privileges required'}, 403
 
-        data = request.json
+        data = request.get_json()
         amenity = get_amenity(amenity_id)
         if not amenity:
             return {'error': 'Amenity not found'}, 404
 
-        updated_amenity = update_amenity(amenity_id, data)
+        try:
+            updated_amenity = update_amenity(amenity_id, data)
+        except Exception as e:
+            return {'error': str(e)}, 400
+
         return {
             'message': 'Amenity updated',
             'amenity': updated_amenity.to_dict()
