@@ -49,3 +49,4 @@ class AdminAmenityModify(Resource):
             'message': 'Amenity updated',
             'amenity': updated_amenity.to_dict()
         }, 200
+
