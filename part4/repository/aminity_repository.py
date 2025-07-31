@@ -1,9 +1,9 @@
-from models.amenity import Amenity
-from models import db
+from app.models.amenity import Amenity
+from app import db
 
 class AmenityRepository:
-    def __init__(self, session=db.session):
-        self.session = session
+    def __init__(self, session=None):
+        self.session = session or db.session
 
     def add(self, amenity):
         self.session.add(amenity)
