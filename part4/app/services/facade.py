@@ -179,14 +179,66 @@ class HBnBFacade:
 
 _facade = HBnBFacade()
 
+# Users
+def create_user(user_data):
+    return _facade.create_user(user_data)
+
+def get_user(user_id):
+    return _facade.get_user(user_id)
+
 def get_user_by_email(email):
     return _facade.get_user_by_email(email)
 
-def create_user(user_data):
-    return _facade.create_user(user_data)
+def get_all_users():
+    return _facade.get_all_users()
 
 def update_user(user_id, user_data):
     return _facade.update_user(user_id, user_data)
 
 def delete_user(user_id):
     return _facade.delete_user(user_id)
+
+# Amenities
+def create_amenity(amenity_data):
+    return _facade.create_amenity(amenity_data)
+
+def get_amenity(amenity_id):
+    return _facade.get_amenity(amenity_id)
+
+def get_all_amenities():
+    return _facade.get_all_amenities()
+
+def update_amenity(amenity_id, amenity_data):
+    return _facade.update_amenity(amenity_id, amenity_data)
+
+# Places
+def create_place(data):
+    return _facade.create_place(data)
+
+def get_place(place_id):
+    return _facade.get_place(place_id)
+
+def list_places():
+    return _facade.list_places()
+
+def update_place(place_id, data):
+    return _facade.update_place(place_id, data)
+
+# Reviews
+def create_review(review_data):
+    return _facade.create_review(review_data)
+
+def get_review(review_id):
+    return _facade.get_review(review_id)
+
+def get_all_reviews():
+    return _facade.get_all_reviews()
+
+def get_reviews_by_place(place_id):
+    return _facade.get_reviews_by_place(place_id)
+
+def update_review(review_id, review_data):
+    return _facade.update_review(review_id, review_data)
+
+def delete_review(review_id):
+    return _facade.delete_review(review_id)
