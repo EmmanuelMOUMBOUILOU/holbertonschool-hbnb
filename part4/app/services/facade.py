@@ -3,20 +3,23 @@ from app.models.place import Place
 from app.models.amenity import Amenity
 from app.models.review import Review
 
-from app.persistence.repository import SQLAlchemyRepository  # repo générique SQLAlchemy
+from app.persistence.user_repository import UserRepository
+from app.persistence.place_repository import PlaceRepository
+from app.persistence.review_repository import ReviewRepository
+from app.persistence.amenity_repository import AmenityRepository
+
 
 class HBnBFacade:
     def __init__(self):
-        # Utilisation du repository générique SQLAlchemyRepository avec le modèle passé en paramètre
-        self.user_repo = SQLAlchemyRepository(User)
-        self.place_repo = SQLAlchemyRepository(Place)
-        self.review_repo = SQLAlchemyRepository(Review)
-        self.amenity_repo = SQLAlchemyRepository(Amenity)
+        self.user_repo = UserRepository()
+        self.place_repo = PlaceRepository()
+        self.review_repo = ReviewRepository()
+        self.amenity_repo = AmenityRepository()
 
-    # -------- USER --------
+    # ---------- Users ----------
     def create_user(self, user_data):
         user = User(**user_data)
-        user.hash_password(user_data['password'])  # hashing du mot de passe
+        user.hash_password(user_data['password'])
         self.user_repo.add(user)
         return user
 
@@ -29,16 +32,10 @@ class HBnBFacade:
     def get_all_users(self):
         return self.user_repo.get_all()
 
-    def update_user(self, user_id, user_data):
-        user = self.user_repo.get(user_id)
-        if not user:
-            return None
-        for key, value in user_data.items():
-            setattr(user, key, value)
-        self.user_repo.update()  # commit
-        return user
+    def put_update_users(self, user_id):
+        return self.user_repo.put(user_id)
 
-    # -------- AMENITY --------
+    # ---------- Amenities ----------
     def create_amenity(self, amenity_data):
         amenity = Amenity(**amenity_data)
         self.amenity_repo.add(amenity)
@@ -59,9 +56,8 @@ class HBnBFacade:
         self.amenity_repo.update()
         return amenity
 
-    # -------- PLACE --------
+    # ---------- Places ----------
     def create_place(self, data):
-        # Champs requis
         required = [
             "name", "description", "city", "user_id",
             "price_by_night", "latitude", "longitude"
@@ -80,7 +76,6 @@ class HBnBFacade:
             if amenity:
                 amenities.append(amenity)
 
-        # Validation basique
         if float(data["price_by_night"]) < 0:
             raise ValueError("Price must be non-negative")
         if not (-90 <= float(data["latitude"]) <= 90):
@@ -111,17 +106,19 @@ class HBnBFacade:
         place = self.place_repo.get(place_id)
         if not place:
             return None
-        for key in ["name", "description", "city", "price_by_night", "latitude", "longitude"]:
+        for key in [
+            "name", "description", "city",
+            "price_by_night", "latitude", "longitude"
+        ]:
             if key in data:
                 setattr(place, key, data[key])
         self.place_repo.update()
         return place
 
-    # -------- REVIEW --------
+    # ---------- Reviews ----------
     def create_review(self, review_data):
         user = self.user_repo.get(review_data["user_id"])
         place = self.place_repo.get(review_data["place_id"])
-
         if not user or not place:
             raise ValueError("User or Place not found")
 
@@ -140,11 +137,10 @@ class HBnBFacade:
         return self.review_repo.get_all()
 
     def get_reviews_by_place(self, place_id):
-        place = self.place_repo.get(place_id)
-        if not place:
-            raise ValueError("Place not found")
-        # Filtrer les reviews du lieu
-        return [r for r in self.get_all_reviews() if r.place_id == place_id]
+        return [
+            r for r in self.review_repo.get_all()
+            if r.place_id == place_id
+        ]
 
     def update_review(self, review_id, review_data):
         review = self.review_repo.get(review_id)
