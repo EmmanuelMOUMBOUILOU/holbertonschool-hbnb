@@ -14,7 +14,7 @@ def create_app(config_class=config.DevelopmentConfig):
     api = Api(app, version='1.0', title='HBnB API',
               description='HBnB Application API', doc='/api/v1/')
 
-    # Import namespaces ici
+    # Import namespaces
     from app.api.v1.auth import api as auth_ns
     from app.api.v1.users import api as users_ns
     from app.api.v1.places import api as place_ns
@@ -27,13 +27,13 @@ def create_app(config_class=config.DevelopmentConfig):
     api.add_namespace(amenity_ns, path='/api/v1/amenities')
     api.add_namespace(review_ns, path='/api/v1/reviews')
 
-    # Blueprints admin
+    # Import admin namespaces
     from app.services.admin_user import api as admin_user_api
     from app.services.admin_amenity import api as admin_amenity_api
     from app.services.admin_place import api as admin_place_api
 
-    app.register_blueprint(admin_user_api.blueprint)
-    app.register_blueprint(admin_amenity_api.blueprint)
-    app.register_blueprint(admin_place_api.blueprint)
+    api.add_namespace(admin_user_api, path='/api/v1/admin/users')
+    api.add_namespace(admin_amenity_api, path='/api/v1/admin/amenities')
+    api.add_namespace(admin_place_api, path='/api/v1/admin/places')
 
     return app
