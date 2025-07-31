@@ -131,6 +131,10 @@ document.getElementById('price-filter').addEventListener('change', (event) => {
     });
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuthentication(); // Démarre le processus
+});
+
 // Script pour la page de détails d'un lieu (place.html)
 
 function getPlaceIdFromURL() {
