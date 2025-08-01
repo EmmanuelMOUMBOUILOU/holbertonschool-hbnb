@@ -211,24 +211,3 @@ button[type="submit"]:hover {
     }
 }
 
-
-
-
-✅ Résumé des classes incluses :
-.place-card → pour les cartes de lieux
-
-.details-button → pour le bouton "View Details"
-
-.place-details, .place-info → pour les détails du lieu
-
-.review-card → pour les avis utilisateurs
-
-#add-review, #review-form → pour le formulaire d'ajout d’avis
-
-#login-form → pour le formulaire de connexion
-
-.logo, .login-button → pour l'en-tête
-
-footer stylé
-
-Responsive design 📱
