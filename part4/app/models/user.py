@@ -1,6 +1,6 @@
 import re
 import uuid
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from app.extensions import db, bcrypt
 from app.models.base_model import BaseModel
 
@@ -12,27 +12,30 @@ class User(BaseModel, db.Model):
     last_name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
-    places = relationship('Place', backref='owner', lazy=True)
-    reviews = relationship('Review', backref='author', lazy=True)
+    places = relationship('Place', back_populates='owner', lazy='dynamic')
+    reviews = relationship('Review', back_populates='author', lazy='dynamic')
 
     def __init__(self, first_name, last_name, email, password, is_admin=False):
         super().__init__()
-
-        # Validation
-        if not email or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-            raise ValueError("Email invalide")
-        if len(first_name) > 50 or len(last_name) > 50:
-            raise ValueError("Nom trop long (max 50 caractères)")
-
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
         self.is_admin = is_admin
-
-        # Hashage du mot de passe
         self.hash_password(password)
+
+    @validates('email')
+    def validate_email(self, key, email):
+        if not email or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            raise ValueError("Email invalide")
+        return email
+
+    @validates('first_name', 'last_name')
+    def validate_name(self, key, value):
+        if not value or len(value) > 50:
+            raise ValueError(f"{key} invalide ou trop long (max 50 caractères)")
+        return value
 
     def hash_password(self, password):
         """Hash le mot de passe avant de le stocker."""

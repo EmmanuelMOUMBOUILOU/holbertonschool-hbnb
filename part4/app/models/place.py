@@ -1,9 +1,8 @@
 import uuid
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from app.extensions import db  # Import depuis extensions pour éviter les cercles
 from app.models.base_model import BaseModel
 
-# Table d'association many-to-many entre places et amenities
 place_amenity = db.Table(
     'place_amenity',
     db.Column('place_id', db.String(36), db.ForeignKey('places.id'), primary_key=True),
@@ -21,20 +20,23 @@ class Place(BaseModel, db.Model):
     longitude = db.Column(db.Float, nullable=True)
 
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
-    owner = relationship('User', backref='places')
+    owner = relationship('User', back_populates='places')
 
-    reviews = relationship('Review', backref='place', lazy=True)
+    reviews = relationship('Review', back_populates='place', lazy='dynamic')
 
-    amenities = relationship('Amenity', secondary=place_amenity,
-                             backref=db.backref('places', lazy='dynamic'),
-                             lazy='subquery')
+    amenities = relationship(
+        'Amenity',
+        secondary=place_amenity,
+        back_populates='places',
+        lazy='subquery'
+    )
 
-    def __init__(self, title, description, price, latitude, longitude, owner):
+    def __init__(self, title, description, price, latitude=None, longitude=None, owner=None):
         super().__init__()
 
         if not title or len(title) > 128:
             raise ValueError("Titre requis ou trop long (max 128 caractères)")
-        if price <= 0:
+        if price is None or price <= 0:
             raise ValueError("Prix invalide")
         if latitude is not None and not (-90.0 <= latitude <= 90.0):
             raise ValueError("Latitude invalide")
@@ -53,7 +55,7 @@ class Place(BaseModel, db.Model):
         self.price = price
         self.latitude = latitude
         self.longitude = longitude
-        self.owner = owner
+        self.owner = owner  # Met à jour user_id automatiquement
 
     def add_review(self, review):
         if review not in self.reviews:

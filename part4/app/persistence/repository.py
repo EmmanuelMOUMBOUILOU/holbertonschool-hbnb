@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from app import db  # Assuming you have set up SQLAlchemy in your Flask app
-from app.models import User, Place, Review, Amenity  # Import your models
+from app import db  # Instance SQLAlchemy (db)
+from app.models import User, Place, Review, Amenity  # tes modèles
+
 
 class Repository(ABC):
     @abstractmethod
@@ -29,39 +30,47 @@ class Repository(ABC):
 
 
 class SQLAlchemyRepository(Repository):
-    def __init__(self, model):
+    def __init__(self, model, session=None):
         self.model = model
+        self.session = session or db.session  # On accepte une session personnalisée ou on prend la session globale
 
     def add(self, obj):
-        db.session.add(obj)
-        db.session.commit()
+        self.session.add(obj)
+        self.session.commit()
 
     def get(self, obj_id):
-        return self.model.query.get(obj_id)
+        return self.session.query(self.model).get(obj_id)
 
     def get_all(self):
-        return self.model.query.all()
+        return self.session.query(self.model).all()
 
     def update(self, obj_id, data):
         obj = self.get(obj_id)
         if obj:
             for key, value in data.items():
-                setattr(obj, key, value)
-            db.session.commit()
+                if hasattr(obj, key):
+                    setattr(obj, key, value)
+            self.session.commit()
+        return obj
 
     def delete(self, obj_id):
         obj = self.get(obj_id)
         if obj:
-            db.session.delete(obj)
-            db.session.commit()
+            self.session.delete(obj)
+            self.session.commit()
+            return True
+        return False
 
     def get_by_attribute(self, attr_name, attr_value):
-        return self.model.query.filter(getattr(self.model, attr_name) == attr_value).first()
+        attr = getattr(self.model, attr_name, None)
+        if attr is None:
+            return None
+        return self.session.query(self.model).filter(attr == attr_value).first()
 
 
 class UserRepository(SQLAlchemyRepository):
-    def __init__(self):
-        super().__init__(User)
+    def __init__(self, session=None):
+        super().__init__(User, session)
 
     def get_user_by_email(self, email):
-        return self.model.query.filter_by(email=email).first()
+        return self.session.query(self.model).filter_by(email=email).first()
