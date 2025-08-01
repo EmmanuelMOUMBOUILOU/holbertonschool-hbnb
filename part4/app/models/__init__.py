@@ -5,4 +5,4 @@ from .amenity import Amenity
 from .base_model import BaseModel
 
 # Permet d'importer directement : from models import User
-__all__ = ['User', 'Place', 'Review', 'Amenity', 'BaseModel']
+__all__ = ['User', 'Place', 'Review', 'Amenity', 'BaseModel', "place_amenity"]
