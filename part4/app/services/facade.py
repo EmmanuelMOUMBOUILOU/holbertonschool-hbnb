@@ -8,13 +8,14 @@ from app.persistence.place_repository import PlaceRepository
 from app.persistence.review_repository import ReviewRepository
 from app.persistence.amenity_repository import AmenityRepository
 
+from app.extensions import db
 
 class HBnBFacade:
     def __init__(self):
-        self.user_repo = UserRepository()
-        self.place_repo = PlaceRepository()
-        self.review_repo = ReviewRepository()
-        self.amenity_repo = AmenityRepository()
+        self.user_repo = UserRepository(db.session)
+        self.place_repo = PlaceRepository(db.session)
+        self.review_repo = ReviewRepository(db.session)
+        self.amenity_repo = AmenityRepository(db.session)
 
     # ---------- Users ----------
     def create_user(self, user_data):
@@ -41,15 +42,12 @@ class HBnBFacade:
                 user.hash_password(value)
             else:
                 setattr(user, key, value)
-        self.user_repo.update(user)
+        self.user_repo.update(user_id, user_data)
         return user
 
     def delete_user(self, user_id):
-        user = self.user_repo.get(user_id)
-        if not user:
-            return None
-        self.user_repo.delete(user)
-        return True
+        success = self.user_repo.delete(user_id)
+        return success
 
     # ---------- Amenities ----------
     def create_amenity(self, amenity_data):
@@ -69,8 +67,11 @@ class HBnBFacade:
             return None
         for key, value in amenity_data.items():
             setattr(amenity, key, value)
-        self.amenity_repo.update(amenity)
+        self.amenity_repo.update(amenity_id, amenity_data)
         return amenity
+
+    def delete_amenity(self, amenity_id):
+        return self.amenity_repo.delete(amenity_id)
 
     # ---------- Places ----------
     def create_place(self, data):
@@ -92,11 +93,15 @@ class HBnBFacade:
             if amenity:
                 amenities.append(amenity)
 
-        if float(data["price_by_night"]) < 0:
+        price = float(data["price_by_night"])
+        lat = float(data["latitude"])
+        lng = float(data["longitude"])
+
+        if price < 0:
             raise ValueError("Price must be non-negative")
-        if not (-90 <= float(data["latitude"]) <= 90):
+        if not (-90 <= lat <= 90):
             raise ValueError("Invalid latitude")
-        if not (-180 <= float(data["longitude"]) <= 180):
+        if not (-180 <= lng <= 180):
             raise ValueError("Invalid longitude")
 
         place = Place(
@@ -104,9 +109,9 @@ class HBnBFacade:
             description=data["description"],
             city=data["city"],
             user=user,
-            price_by_night=float(data["price_by_night"]),
-            latitude=float(data["latitude"]),
-            longitude=float(data["longitude"]),
+            price_by_night=price,
+            latitude=lat,
+            longitude=lng,
             amenities=amenities
         )
         self.place_repo.add(place)
@@ -128,15 +133,11 @@ class HBnBFacade:
         ]:
             if key in data:
                 setattr(place, key, data[key])
-        self.place_repo.update(place)
+        self.place_repo.update(place_id, data)
         return place
 
     def delete_place(self, place_id):
-        place = self.place_repo.get(place_id)
-        if not place:
-            return None
-        self.place_repo.delete(place)
-        return True
+        return self.place_repo.delete(place_id)
 
     # ---------- Reviews ----------
     def create_review(self, review_data):
@@ -146,8 +147,8 @@ class HBnBFacade:
             raise ValueError("User or Place not found")
 
         rating = review_data.get("rating")
-        if not (1 <= rating <= 5):
-            raise ValueError("Rating must be between 1 and 5")
+        if not isinstance(rating, int) or not (1 <= rating <= 5):
+            raise ValueError("Rating must be an integer between 1 and 5")
 
         review = Review(**review_data)
         self.review_repo.add(review)
@@ -171,18 +172,14 @@ class HBnBFacade:
             return None
         for key, value in review_data.items():
             setattr(review, key, value)
-        self.review_repo.update(review)
+        self.review_repo.update(review_id, review_data)
         return review
 
     def delete_review(self, review_id):
-        review = self.review_repo.get(review_id)
-        if not review:
-            return None
-        self.review_repo.delete(review)
-        return True
+        return self.review_repo.delete(review_id)
 
 
-# --- Fonctions exposées globalement ---
+# --- Fonctions globales exposées ---
 
 _facade = HBnBFacade()
 
@@ -217,6 +214,9 @@ def get_all_amenities():
 
 def update_amenity(amenity_id, amenity_data):
     return _facade.update_amenity(amenity_id, amenity_data)
+
+def delete_amenity(amenity_id):
+    return _facade.delete_amenity(amenity_id)
 
 # Places
 def create_place(data):
