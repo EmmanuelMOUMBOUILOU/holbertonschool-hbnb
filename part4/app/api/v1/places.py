@@ -2,6 +2,7 @@ from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import request
 from app.services import facade
+from app.models import Place
 
 api = Namespace('places', description='Place operations')
 
@@ -47,8 +48,20 @@ class PlaceList(Resource):
 
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
-        places = facade.get_list_places()
-        return [{'id': place.id, 'title': place.title, 'description': place.description, 'price': place.price, 'latitude': place.latitude, 'longitude': place.longitude, 'owner_id': place.owner.id if place.owner else None} for place in places], 200
+        try:
+            places = facade.get_list_places()
+            return [{
+                'id': place.id,
+                'title': place.title,
+                'description': place.description,
+                'price': place.price,
+                'latitude': place.latitude,
+                'longitude': place.longitude,
+                'owner_id': place.owner.id if place.owner else None
+            } for place in places], 200
+        except Exception as e:
+            print("🔥 ERREUR:", e)
+            return {"error": str(e)}, 500
 
 @api.route('/<place_id>')
 class PlaceResource(Resource):
