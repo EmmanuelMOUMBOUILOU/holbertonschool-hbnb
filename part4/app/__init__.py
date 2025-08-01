@@ -9,9 +9,11 @@ def create_app(config_class=config.DevelopmentConfig):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # CORS : autorise uniquement le frontend
-    CORS(app, resources={r"/api/*": {"origins": ["http://127.0.0.1:5500", "http://localhost:5500"]}},
-         supports_credentials=True)
+    # CORS : autorise uniquement le frontend (avec supports_credentials pour cookies si besoin)
+    CORS(app, resources={r"/api/*": {"origins": [
+        "http://127.0.0.1:5500",
+        "http://localhost:5500"
+    ]}}, supports_credentials=True)
 
     # Configuration JWT
     app.config['JWT_TOKEN_LOCATION'] = ['headers']
@@ -25,7 +27,7 @@ def create_app(config_class=config.DevelopmentConfig):
     bcrypt.init_app(app)
     jwt.init_app(app)
 
-    # Fonction after_request pour garantir les bons headers CORS
+    # === Headers CORS personnalisés pour toutes les routes après traitement ===
     @app.after_request
     def after_request(response):
         origin = request.headers.get('Origin')
@@ -36,16 +38,21 @@ def create_app(config_class=config.DevelopmentConfig):
             response.headers.add('Access-Control-Allow-Credentials', 'true')
         return response
 
-    # (Optionnel) Catch-all route for OPTIONS
-    @app.route('/api/<path:dummy>', methods=['OPTIONS'])
-    def catch_all_options(dummy):
-        return '', 204
+    # === Gestion des requêtes OPTIONS pour éviter erreurs CORS ===
+    @app.route('/api/<path:path>', methods=['OPTIONS'])
+    def handle_preflight(path):
+        response = app.make_response('')
+        response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin', ''))
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response, 204
 
-    # Documentation API
+    # === Documentation API ===
     api = Api(app, version='1.0', title='HBnB API',
               description='HBnB Application API', doc='/api/v1/')
 
-    # Namespaces publics
+    # === Namespaces publics ===
     from app.api.v1.auth import api as auth_ns
     from app.api.v1.users import api as users_ns
     from app.api.v1.places import api as place_ns
@@ -58,7 +65,7 @@ def create_app(config_class=config.DevelopmentConfig):
     api.add_namespace(amenity_ns, path='/api/v1/amenities')
     api.add_namespace(review_ns, path='/api/v1/reviews')
 
-    # Namespaces admin
+    # === Namespaces admin ===
     from app.services.admin_user import api as admin_user_api
     from app.services.admin_amenity import api as admin_amenity_api
     from app.services.admin_place import api as admin_place_api
