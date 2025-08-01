@@ -3,10 +3,11 @@ from sqlalchemy.orm import relationship, validates
 from app.extensions import db
 from app.models.base_model import BaseModel
 
+# Table d'association Many-to-Many entre Place et Amenity
 place_amenity = db.Table(
     'place_amenity',
-    db.Column('place_id', db.String(36), db.ForeignKey('places.id'), primary_key=True),
-    db.Column('amenity_id', db.String(36), db.ForeignKey('amenities.id'), primary_key=True)
+    db.Column('place_id', db.String(36), db.ForeignKey('places.id'), primary_key=True, nullable=False),
+    db.Column('amenity_id', db.String(36), db.ForeignKey('amenities.id'), primary_key=True, nullable=False)
 )
 
 class Place(BaseModel, db.Model):
@@ -60,6 +61,7 @@ class Place(BaseModel, db.Model):
         if amenity not in self.amenities:
             self.amenities.append(amenity)
 
+    # Validators SQLAlchemy : garantissent les contraintes sur les données
     @validates('title')
     def validate_title(self, key, value):
         if not value or len(value) > 128:
@@ -94,5 +96,5 @@ class Place(BaseModel, db.Model):
             "longitude": self.longitude,
             "user_id": self.user_id,
             "amenities": [amenity.id for amenity in self.amenities],
-            # Pour les reviews, tu peux aussi faire [review.to_dict() for review in self.reviews] si besoin
+            "reviews": [review.to_dict() for review in self.reviews],
         }
