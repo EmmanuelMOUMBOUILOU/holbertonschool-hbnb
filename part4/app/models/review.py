@@ -18,7 +18,7 @@ class Review(BaseModel, db.Model):
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
 
     place = relationship('Place', back_populates='reviews')
-    user = relationship('User', back_populates='reviews')
+    author = relationship('User', back_populates='reviews')
 
     def __init__(self, text, rating, place, user):
         super().__init__()
