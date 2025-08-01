@@ -1,6 +1,6 @@
 import uuid
 from sqlalchemy.orm import relationship, validates
-from app.extensions import db  # Import depuis extensions pour éviter les cercles
+from app.extensions import db
 from app.models.base_model import BaseModel
 
 place_amenity = db.Table(
@@ -22,7 +22,7 @@ class Place(BaseModel, db.Model):
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
     owner = relationship('User', back_populates='places')
 
-    reviews = relationship('Review', back_populates='place', lazy='dynamic')
+    reviews = relationship('Review', back_populates='place', lazy='select')
 
     amenities = relationship(
         'Amenity',
@@ -45,7 +45,6 @@ class Place(BaseModel, db.Model):
         if not owner:
             raise ValueError("Propriétaire requis")
 
-        # Import local pour éviter import circulaire
         from app.models.user import User
         if not isinstance(owner, User):
             raise ValueError("Propriétaire invalide")
@@ -55,15 +54,35 @@ class Place(BaseModel, db.Model):
         self.price = price
         self.latitude = latitude
         self.longitude = longitude
-        self.owner = owner  # Met à jour user_id automatiquement
-
-    def add_review(self, review):
-        if review not in self.reviews:
-            self.reviews.append(review)
+        self.owner = owner
 
     def add_amenity(self, amenity):
         if amenity not in self.amenities:
             self.amenities.append(amenity)
+
+    @validates('title')
+    def validate_title(self, key, value):
+        if not value or len(value) > 128:
+            raise ValueError("Titre requis ou trop long (max 128 caractères)")
+        return value
+
+    @validates('price')
+    def validate_price(self, key, value):
+        if value is None or value <= 0:
+            raise ValueError("Prix invalide")
+        return value
+
+    @validates('latitude')
+    def validate_latitude(self, key, value):
+        if value is not None and not (-90.0 <= value <= 90.0):
+            raise ValueError("Latitude invalide")
+        return value
+
+    @validates('longitude')
+    def validate_longitude(self, key, value):
+        if value is not None and not (-180.0 <= value <= 180.0):
+            raise ValueError("Longitude invalide")
+        return value
 
     def to_dict(self):
         return {
@@ -73,5 +92,7 @@ class Place(BaseModel, db.Model):
             "price": self.price,
             "latitude": self.latitude,
             "longitude": self.longitude,
-            "user_id": self.user_id
+            "user_id": self.user_id,
+            "amenities": [amenity.id for amenity in self.amenities],
+            # Pour les reviews, tu peux aussi faire [review.to_dict() for review in self.reviews] si besoin
         }

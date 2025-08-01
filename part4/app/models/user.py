@@ -10,32 +10,38 @@ class User(BaseModel, db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(120), nullable=False, unique=True)
+    email = db.Column(db.String(120), nullable=False, unique=True, index=True)
     password = db.Column(db.String(128), nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
+    # Relations (bidirectionnelles avec back_populates)
     places = relationship('Place', back_populates='owner', lazy='dynamic')
     reviews = relationship('Review', back_populates='user', lazy='dynamic')
 
-    def __init__(self, first_name, last_name, email, password, is_admin=False):
+    def __init__(self, first_name=None, last_name=None, email=None, password=None, is_admin=False):
+        # Appel du constructeur parent (BaseModel)
         super().__init__()
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
+        if first_name is not None:
+            self.first_name = first_name
+        if last_name is not None:
+            self.last_name = last_name
+        if email is not None:
+            self.email = email
         self.is_admin = is_admin
-        self.hash_password(password)
+        if password is not None:
+            self.hash_password(password)
 
     @validates('email')
     def validate_email(self, key, email):
         if not email or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
             raise ValueError("Email invalide")
-        return email
+        return email.lower()  # On force en minuscule pour uniformité
 
     @validates('first_name', 'last_name')
     def validate_name(self, key, value):
         if not value or len(value) > 50:
             raise ValueError(f"{key} invalide ou trop long (max 50 caractères)")
-        return value
+        return value.strip()  # On enlève espaces superflus
 
     def hash_password(self, password):
         """Hash le mot de passe avant de le stocker."""

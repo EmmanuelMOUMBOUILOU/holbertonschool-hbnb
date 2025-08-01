@@ -18,9 +18,9 @@ class Review(BaseModel, db.Model):
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
 
     place = relationship('Place', back_populates='reviews')
-    author = relationship('User', back_populates='reviews')
+    user = relationship('User', back_populates='reviews')  # corrigé : 'user' ici, cohérent avec User.reviews
 
-    def __init__(self, text, rating, place, user):
+    def __init__(self, text=None, rating=None, place=None, user=None):
         super().__init__()
 
         if not text:
