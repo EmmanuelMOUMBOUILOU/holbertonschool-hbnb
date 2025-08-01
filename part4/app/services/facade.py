@@ -122,6 +122,9 @@ class HBnBFacade:
 
     def list_places(self):
         return self.place_repo.get_all()
+    
+    def get_list_places(self):
+        return self.list_places()
 
     def update_place(self, place_id, data):
         place = self.place_repo.get(place_id)
@@ -227,6 +230,9 @@ def get_place(place_id):
 
 def list_places():
     return _facade.list_places()
+
+def get_list_places():
+    return _facade.get_list_places()
 
 def update_place(place_id, data):
     return _facade.update_place(place_id, data)
