@@ -1,6 +1,6 @@
 # holbertonschool-hbnb
 
-Hbnb est un projet académique de la Holberton School, réalisé en groupe avec [EmmanuelMOUMBOUILOU](https://github.com/EmmanuelMOUMBOUILOU) et [Dj-kvt](https://github.com/Dj-kvt) pour la partie back-end, puis en individuel pour la partie front-end. Le but de ce projet était de créer une version simplifiée du site Airbnb. Dans ce projet, j'ai occupé le rôle de développeur web full stack.
+Hbnb est un projet académique de la Holberton School, réalisé en groupe avec [QuentinC26](https://github.com/QuentinC26) et [Dj-kvt](https://github.com/Dj-kvt) pour la partie back-end, puis en individuel pour la partie front-end. Le but de ce projet était de créer une version simplifiée du site Airbnb. Dans ce projet, j'ai occupé le rôle de développeur web full stack.
 
 ## Table des matières
 
